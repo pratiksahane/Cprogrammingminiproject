@@ -1,0 +1,195 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Employee {
+    char name[40];
+    int age;
+    char department[40];
+    char gender;
+    struct Employee* next;
+    struct Employee* prev;
+};
+
+struct Employee* head = NULL;
+struct Employee* current_employee = NULL;
+
+void clearInputBuffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) {}
+}
+
+void insertEmployee() {
+    char temp[40];
+
+    struct Employee* new_employee = (struct Employee*)malloc(sizeof(struct Employee));
+
+    printf("Enter Employee Name:\n");
+    scanf("%s", new_employee->name);
+    clearInputBuffer();
+
+    printf("Enter Employee Age:\n");
+    scanf("%d", &new_employee->age);
+    clearInputBuffer();
+
+    printf("Enter Employee Department:\n");
+    fgets(new_employee->department, sizeof(new_employee->department), stdin);
+    new_employee->department[strcspn(new_employee->department, "\n")] = '\0';
+
+    printf("Enter Employee Gender (M/F):\n");
+    scanf(" %c", &new_employee->gender);
+    clearInputBuffer();
+
+    if (head == NULL) {
+        new_employee->next = new_employee->prev = new_employee;
+        head = current_employee = new_employee;
+    } else {
+        struct Employee* last = head->prev;
+        new_employee->prev = last;
+        last->next = new_employee;
+        new_employee->next = head;
+        head->prev = new_employee;
+    }
+    printf("New Employee Data added.\n");
+}
+
+void deleteEmployee() {
+    char temp[40];
+
+    struct Employee* current;
+    int deleted = 0;
+
+    if (head == NULL) {
+        printf("No Employees in the list to delete!\n");
+        return;
+    }
+
+    printf("Enter Employee Name to delete:\n");
+    scanf(" %[^\n]", temp);
+    clearInputBuffer();
+
+    current = head;
+
+    do {
+        if (strcmp(current->name, temp) == 0) {
+            struct Employee* next = current->next;
+            struct Employee* prev = current->prev;
+            prev->next = next;
+            next->prev = prev;
+            if (current == head) {
+                head = next;
+            }
+            free(current);
+            current = next;
+            deleted = 1;
+        } else {
+            current = current->next;
+        }
+    } while (current != head);
+
+    if (deleted) {
+        printf("Employee(s) deleted!\n");
+    } else {
+        printf("No employee(s) with this name found!\n");
+    }
+}
+
+void showEmployee() {
+    struct Employee* show_employee = head;
+    int i = 1;
+
+    if (show_employee == NULL) {
+        printf("No Employee in the list to show!\n");
+        return;
+    }
+
+    printf("Employee List:\n");
+    do {
+        printf("Employee %d\n", i);
+        printf("Name: %s\n", show_employee->name);
+        printf("Age: %d\n", show_employee->age);
+        printf("Department: %s\n", show_employee->department);
+        printf("Gender: %c\n", show_employee->gender);
+        printf("\n");
+        show_employee = show_employee->next;
+        i++;
+    } while (show_employee != head);
+}
+
+void nextEmployee() {
+    if (current_employee == NULL) {
+        printf("No employees in the list!\n");
+    } else {
+        current_employee = current_employee->next;
+        printf("Displaying Next Employee:\n");
+        printf("Name: %s\n", current_employee->name);
+        printf("Age: %d\n", current_employee->age);
+        printf("Department: %s\n", current_employee->department);
+        printf("Gender: %c\n", current_employee->gender);
+    }
+}
+
+void prevEmployee() {
+    if (current_employee == NULL) {
+        printf("No employees in the list!\n");
+    } else {
+        current_employee = current_employee->prev;
+        printf("Displaying Previous Employee:\n");
+        printf("Name: %s\n", current_employee->name);
+        printf("Age: %d\n", current_employee->age);
+        printf("Department: %s\n", current_employee->department);
+        printf("Gender: %c\n", current_employee->gender);
+    }
+}
+
+void freeEmployees() {
+    struct Employee* ptr = head;
+    do {
+        struct Employee* next = ptr->next;
+        free(ptr);
+        ptr = next;
+    } while (ptr != head);
+}
+
+int main() {
+    int choice;
+    while (1) {
+        printf("\n-----Employee Management System-----\n");
+        printf("1. Add Employee\n");
+        printf("2. Remove Employee\n");
+        printf("3. Show Employee List\n");
+        printf("4. Display Next Employee\n");
+        printf("5. Display Previous Employee\n");
+        printf("6. Exit\n\n");
+        if (scanf("%d", &choice) != 1) {
+            printf("Invalid input! Please enter a number.\n");
+            clearInputBuffer();
+            continue;
+        }
+
+        switch (choice) {
+            case 1:
+                insertEmployee();
+                break;
+            case 2:
+                deleteEmployee();
+                break;
+            case 3:
+                showEmployee();
+                break;
+            case 4:
+                nextEmployee();
+                break;
+            case 5:
+                prevEmployee();
+                break;
+            case 6:
+                freeEmployees();
+                exit(0);
+            default:
+                printf("Invalid choice! Please try again.\n");
+        }
+    }   
+
+    return 0;
+}
